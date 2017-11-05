@@ -1,4 +1,3 @@
-
 {
     "name": "bcismariu/laravel-payments",
     "description": "An alternative to Cashier",
@@ -18,9 +17,14 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Bcismariu\\Laravel\\Payments\\": "tests/"
+            "Bcismariu\\Laravel\\Payments\\Tests\\": "tests/"
         }
     },
     "minimum-stability": "dev",
-    "require": {}
+    "require": {
+        "illuminate/support": "^5.5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.4"
+    }
 }
