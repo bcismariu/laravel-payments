@@ -13,7 +13,7 @@ class PaymentsServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $this->publishConfig();
     }
     /**
      * Register the service provider.
@@ -23,5 +23,19 @@ class PaymentsServiceProvider extends ServiceProvider
     public function register()
     {
         //
+    }
+
+
+    protected function publishConfig()
+    {
+        $path = $this->packagePath('config/payments.php');
+        $this->publishes([
+            $path => config_path('payments.php')
+        ], 'config');
+    }
+
+    protected function packagePath($path)
+    {
+        return __DIR__ . "/../$path";
     }
 }
