@@ -1,0 +1,26 @@
+
+{
+    "name": "bcismariu/laravel-payments",
+    "description": "An alternative to Cashier",
+    "keywords": ["laravel", "billing", "konnektive"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bogdan Cismariu",
+            "email": "bogdan.cismariu@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Bcismariu\\Laravel\\Payments\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Bcismariu\\Laravel\\Payments\\": "tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {}
+}
