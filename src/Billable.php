@@ -8,10 +8,12 @@ trait Billable
 {
     protected $_payments_card;
     protected $_product;
+    protected $_options;
 
     public function charge($ammount, $options = [])
     {
         $options['price'] = $ammount;
+        $this->_options = $options;
         $this->setProduct($options);
 
         return $this->processPayment();
@@ -80,6 +82,8 @@ trait Billable
         if (!$settings) {
             throw new \Exception("Processor $processor not found!");
         }
+
+        $settings = array_merge($settings, $this->_options);
 
         return Processors\Processor::make($settings);
     }
