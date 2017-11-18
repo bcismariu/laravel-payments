@@ -23,11 +23,10 @@ Publish the package configuration files.
 php artisan vendor:publish --provider="Bcismariu\\Laravel\\Payments\\PaymentsServiceProvider" --tag="config" --force
 ```
 
-Add the following lines to your `.env` file:
+Migrate the database
 
 ```
-KONNEKTIVE_LOGIN=your-konnektive-loginId
-KONNEKTIVE_PASSWORD=your-konnektive-password
+php artisan migrate
 ```
 
 #### Attention!
@@ -46,6 +45,13 @@ Edit your `composer.json` file to reflect the following:
     "require": {
         "hassletauf/konnektive-crm": "dev-validation"
     },
+```
+
+Add the following lines to your `.env` file:
+
+```
+KONNEKTIVE_LOGIN=your-konnektive-loginId
+KONNEKTIVE_PASSWORD=your-konnektive-password
 ```
 
 
