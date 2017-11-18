@@ -72,5 +72,7 @@ $user->setCreditCard(new Card([
     'cvc_check' => '123', 
 ]));
 
-$response = $user->charge(5);
+$response = $user->charge(5, [
+        'product_id'    => 1234
+    ]);
 ```
