@@ -7,6 +7,7 @@ use Bcismariu\Laravel\Payments\Customer;
 use Bcismariu\Laravel\Payments\Product;
 use Konnektive\Dispatcher;
 use Konnektive\Request\Order\ImportOrderRequest;
+use Konnektive\Response\Response as KonnektiveResponse;
 
 class Konnektive
 {
@@ -14,6 +15,7 @@ class Konnektive
     protected $credit_card;
     protected $products = [];
     protected $options = [];
+    protected $request;
 
 
     public function __construct($settings = []) {
@@ -43,78 +45,94 @@ class Konnektive
 
     public function process()
     {
-        $request = new ImportOrderRequest();
+        $this->request = new ImportOrderRequest();
 
-        $this->applyCustomer($request);
-        $this->applyCreditCard($request);
-        $this->applyProducts($request);
-        $this->applyOptions($request);
+        $this->applyCustomer();
+        $this->applyCreditCard();
+        $this->applyProducts();
+        $this->applyOptions();
+
+        $this->validate();
 
         $dispatcher = new Dispatcher();    
-
-        $this->validate($request);
-
-        return $dispatcher->handle($request);
+        $response = $dispatcher->handle($this->request);
+        return $this->transformResponse($response);
     }
 
-    protected function applyCustomer(ImportOrderRequest &$request)
+    protected function applyCustomer()
     {
         $customer = $this->customer;
 
-        $request->firstName     = $customer->first_name;
-        $request->lastName      = $customer->last_name;
-        $request->companyName   = $customer->company;
-        $request->address1      = $customer->address;
-        $request->postalCode    = $customer->postcode;
-        $request->city          = $customer->city;
-        $request->state         = $customer->state;
-        $request->country       = $customer->country;
-        $request->emailAddress  = $customer->email;
-        $request->phoneNumber   = $customer->phone;
-        $request->ipAddress     = $customer->ip_address;
+        $this->request->firstName     = $customer->first_name;
+        $this->request->lastName      = $customer->last_name;
+        $this->request->companyName   = $customer->company;
+        $this->request->address1      = $customer->address;
+        $this->request->postalCode    = $customer->postcode;
+        $this->request->city          = $customer->city;
+        $this->request->state         = $customer->state;
+        $this->request->country       = $customer->country;
+        $this->request->emailAddress  = $customer->email;
+        $this->request->phoneNumber   = $customer->phone;
+        $this->request->ipAddress     = $customer->ip_address;
+
+        $this->request->shipAddress1  = $customer->shipAddress1;
+        $this->request->shipCity      = $customer->shipCity;
+        $this->request->shipState     = $customer->shipState;
+        $this->request->shipPostalCode    = $customer->shipPostalCode;
+        $this->request->shipCountry       = $customer->shipCountry;
     }
 
-    protected function applyCreditCard(ImportOrderRequest &$request)
+    protected function applyCreditCard()
     {
         $card = $this->credit_card;
 
-        $request->paySource     = 'CREDITCARD';
-        $request->cardNumber    = $card->number;
-        $request->cardMonth     = $card->exp_month;
-        $request->cardYear      = $card->exp_year;
-        $request->cardSecurityCode  = $card->cvc_check;
+        $this->request->paySource     = 'CREDITCARD';
+        $this->request->cardNumber    = $card->number;
+        $this->request->cardMonth     = $card->exp_month;
+        $this->request->cardYear      = $card->exp_year;
+        $this->request->cardSecurityCode  = $card->cvc_check;
     }
 
-    protected function applyProducts(ImportOrderRequest &$request)
+    protected function applyProducts()
     {
         foreach ($this->products as $index => $product) {
-            $this->applyProduct($request, $product, $index + 1);
+            $this->applyProduct($product, $index + 1);
         }
     }
 
-    protected function applyProduct(ImportOrderRequest $request, $product, $index = 1)
+    protected function applyProduct($product, $index = 1)
     {
         $prefix = 'product' . $index;
 
-        $request->{$prefix . '_id'}     = $product->id;
-        $request->{$prefix . '_qty'}    = $product->quantity;
-        $request->{$prefix . '_price'}  = $product->price;
+        $this->request->{$prefix . '_id'}     = $product->id;
+        $this->request->{$prefix . '_qty'}    = $product->quantity;
+        $this->request->{$prefix . '_price'}  = $product->price;
     }
 
-    protected function applyOptions(ImportOrderRequest $request, $options = [])
+    protected function applyOptions($options = [])
     {
         foreach ($this->options as $key => $value) {
-            $request->$key = $value;
+            $this->request->$key = $value;
         }
     }
 
-    protected function validate(ImportOrderRequest $request)
+    protected function validate()
     {
         try {
-            $request->validate();
+            $this->request->validate();
         } catch(\Illuminate\Validation\ValidationException $e) {
-            dump($request);
-            dd($e->validator->errors());
+            // dump($this->request);
+            // dd($e->validator->errors());
+            throw $e;
         }
+    }
+
+    protected function transformResponse(KonnektiveResponse $konnektive)
+    {
+        $response = new Response();
+        $response->raw = $konnektive->raw;
+        $response->message = $konnektive->message;
+        $response->status = strtolower(trim($konnektive->result));
+        return $response;
     }
 }
