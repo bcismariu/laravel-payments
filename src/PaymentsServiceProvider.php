@@ -14,6 +14,7 @@ class PaymentsServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishConfig();
+        $this->loadMigrationsFrom($this->packagePath('migrations'));
     }
     /**
      * Register the service provider.

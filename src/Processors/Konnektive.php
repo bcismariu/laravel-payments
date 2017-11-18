@@ -133,6 +133,13 @@ class Konnektive
         $response->raw = $konnektive->raw;
         $response->message = $konnektive->message;
         $response->status = strtolower(trim($konnektive->result));
+
+        $response->customer_id      = $konnektive->message['customerId'];
+        $response->order_id         = $konnektive->message['orderId'];
+        $response->campaign_id      = $konnektive->message['campaignId'];
+        $response->product_id       = $konnektive->message['items'][0]['productId'];
+        $response->amount           = $konnektive->message['amountPaid'];
+
         return $response;
     }
 }

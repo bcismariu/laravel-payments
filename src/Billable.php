@@ -3,6 +3,7 @@
 namespace Bcismariu\Laravel\Payments;
 
 use Bcismariu\Laravel\Payments\Processors\Konnektive;
+use Bcismariu\Laravel\Payments\Processors\Response;
 
 trait Billable 
 {
@@ -46,6 +47,28 @@ trait Billable
             $options['id'] = $options['product_id'];
         }
         $this->_product = new Product($options);
+    }
+
+    /**
+     * Orders relations management
+     */
+    public function orders()
+    {
+        return $this->morphMany(Order::class, 'billable');
+    }
+
+    public function saveOrder(Response $response)
+    {
+        $order = new Order([
+            'customer_id'   => $response->customer_id,
+            'order_id'      => $response->order_id,
+            'campaign_id'   => $response->campaign_id,
+            'status'        => $response->status,
+            'product_id'    => $response->product_id,
+            'amount'        => $response->amount
+        ]);
+
+        $this->orders()->save($order);
     }
 
     /**
