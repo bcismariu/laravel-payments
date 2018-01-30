@@ -33,19 +33,7 @@ php artisan migrate
 
 If you plan using the `konnektive` driver, you should also require its dependencies.
 
-Edit your `composer.json` file to reflect the following:
-
-```json
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/bcismariu/konnektive-crm"
-        }
-    ],
-    "require": {
-        "hassletauf/konnektive-crm": "dev-validation"
-    },
-```
+`composer require hassletauf/konnektive-crm`
 
 Add the following lines to your `.env` file:
 
@@ -81,4 +69,28 @@ $user->setCreditCard(new Card([
 $response = $user->charge(5, [
         'product_id'    => 1234
     ]);
+```
+
+### Handling subscriptions
+
+
+```php
+
+// Import the Credit Card info into your User object:
+
+$user->setCreditCard(new Card([
+    'brand'     => 'visa',
+    'number'    => '0000000000000000',
+    'exp_month' => '02',
+    'exp_year'  => '2017',
+    'cvc_check' => '123', 
+]));
+
+// Register the subscription and charge a certain amount:
+
+$subscription = $user->subscribe('plan-name', 5);
+
+// Check if the user has subscribed to a given plan
+
+$user->subscribed('plan-name');
 ```

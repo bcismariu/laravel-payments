@@ -72,6 +72,50 @@ trait Billable
     }
 
     /**
+     * Get all of the subscriptions of the Billable entity
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function subscriptions()
+    {
+        return $this->morphMany(Subscription::class, 'subscriber');
+    }
+
+    /**
+     * Checks if the Billable entity subscribed to the given plan
+     * 
+     * @param  string $plan
+     * @return boolean
+     */
+    public function subscribed($plan = 'default')
+    {
+        return $this->subscriptions->contains(function ($value, $key) use ($plan) {
+            return $value->plan == $plan;
+        });
+    }
+
+    /**
+     * Subscribes the Billable entity to a plan and charges the given amount
+     * 
+     * @param  string $plan
+     * @param  float $amount
+     * @param  array  $options
+     * @return Subscription
+     */
+    public function subscribe($plan, $amount, $options = [])
+    {
+        $subscription = new Subscription([
+            'plan'      => $plan,
+            'status'    => 'active',
+        ]);
+
+        $this->charge($amount, $options);
+        $this->subscriptions()->save($subscription);
+
+        return $subscription;
+    }
+
+    /**
      * Transforms the current model to a 
      * recognized Customer object
      * @return Customer
