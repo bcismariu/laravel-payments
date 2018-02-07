@@ -22,7 +22,9 @@
     },
     "minimum-stability": "dev",
     "require": {
-        "illuminate/support": "^5.4"
+        "bcismariu/commons-descendable": "^0.1",
+        "illuminate/support": "^5.4",
+        "nesbot/carbon": "~1.18"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.4"

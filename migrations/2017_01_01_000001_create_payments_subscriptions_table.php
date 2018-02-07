@@ -18,6 +18,8 @@ class CreatePaymentsSubscriptionsTable extends Migration
             $table->string('subscriber_type');
             $table->integer('subscriber_id');
             $table->string('plan');
+            $table->integer('product_id');
+            $table->integer('customer_id');
             $table->string('status');
             $table->timestamp('ends_at')->nullable();
             $table->timestamps();

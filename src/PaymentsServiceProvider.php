@@ -15,6 +15,12 @@ class PaymentsServiceProvider extends ServiceProvider
     {
         $this->publishConfig();
         $this->loadMigrationsFrom($this->packagePath('migrations'));
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Commands\SyncCommand::class,
+            ]);
+        }
     }
     /**
      * Register the service provider.

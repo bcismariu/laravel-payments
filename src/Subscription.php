@@ -3,6 +3,7 @@
 namespace Bcismariu\Laravel\Payments;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Subscription extends Model
 {
@@ -10,6 +11,8 @@ class Subscription extends Model
 
     protected $fillable = [
         'plan',
+        'product_id',
+        'customer_id',
         'status',
         'ends_at',
     ];
@@ -34,5 +37,12 @@ class Subscription extends Model
     public function subscriber()
     {
         return $this->morphTo();
+    }
+
+    public function isActive()
+    {
+        return $this->status == 'active'
+            && $this->ends_at->gt(Carbon::now())
+        ;
     }
 }

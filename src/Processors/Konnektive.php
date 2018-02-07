@@ -5,9 +5,12 @@ namespace Bcismariu\Laravel\Payments\Processors;
 use Bcismariu\Laravel\Payments\Card;
 use Bcismariu\Laravel\Payments\Customer;
 use Bcismariu\Laravel\Payments\Product;
+use Bcismariu\Commons\Descendable\Descendable;
 use Konnektive\Dispatcher;
 use Konnektive\Request\Order\ImportOrderRequest;
+use Konnektive\Request\Order\QueryOrderRequest;
 use Konnektive\Response\Response as KonnektiveResponse;
+
 
 class Konnektive
 {
@@ -59,6 +62,19 @@ class Konnektive
         return $this->transformResponse($response);
     }
 
+    public function sync()
+    {
+        $this->request = new QueryOrderRequest();
+
+        $this->applyOptions();
+        $this->validate();
+
+        $dispatcher = new Dispatcher();
+        $response = $dispatcher->handle($this->request);
+
+        return $response->raw;
+    }
+
     protected function applyCustomer()
     {
         $customer = $this->customer;
@@ -105,8 +121,12 @@ class Konnektive
         $prefix = 'product' . $index;
 
         $this->request->{$prefix . '_id'}     = $product->id;
-        $this->request->{$prefix . '_qty'}    = $product->quantity;
-        $this->request->{$prefix . '_price'}  = $product->price;
+        if ($product->quantity) {
+            $this->request->{$prefix . '_qty'}    = $product->quantity;
+        }
+        if ($product->price) {
+            $this->request->{$prefix . '_price'}  = $product->price;
+        }
     }
 
     protected function applyOptions($options = [])
@@ -130,15 +150,16 @@ class Konnektive
     protected function transformResponse(KonnektiveResponse $konnektive)
     {
         $response = new Response();
-        $response->raw = $konnektive->raw;
-        $response->message = $konnektive->message;
-        $response->status = strtolower(trim($konnektive->result));
+        $konnektive = new Descendable($konnektive);
+        $response->raw = $konnektive->get('raw');
+        $response->message = $konnektive->get('message');
+        $response->status = strtolower(trim($konnektive->get('result')));
 
-        $response->customer_id      = $konnektive->message['customerId'];
-        $response->order_id         = $konnektive->message['orderId'];
-        $response->campaign_id      = $konnektive->message['campaignId'];
-        $response->product_id       = $konnektive->message['items'][0]['productId'];
-        $response->amount           = $konnektive->message['amountPaid'];
+        $response->customer_id      = $konnektive->get('message.customerId');
+        $response->order_id         = $konnektive->get('message.orderId');
+        $response->campaign_id      = $konnektive->get('message.campaignId');
+        $response->product_id       = $konnektive->get('message.items.0.productId');
+        $response->amount           = $konnektive->get('message.amountPaid');
 
         return $response;
     }

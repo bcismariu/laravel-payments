@@ -4,6 +4,7 @@ namespace Bcismariu\Laravel\Payments;
 
 use Bcismariu\Laravel\Payments\Processors\Konnektive;
 use Bcismariu\Laravel\Payments\Processors\Response;
+use Carbon\Carbon;
 
 trait Billable 
 {
@@ -18,7 +19,22 @@ trait Billable
         $this->setProduct($options);
 
         return $this->processPayment();
+    }
 
+    public function order($product_id, $options = [])
+    {
+        $this->_options = $options;
+        $options['product_id'] = $product_id;
+        $this->setProduct($options);
+
+        $response = $this->processPayment();
+
+        if ($response->status !== 'success') {
+            throw new \Exception($response->message);
+        }
+        
+        $order = $this->saveOrder($response);
+        return $order;
     }
 
     /**
@@ -69,6 +85,7 @@ trait Billable
         ]);
 
         $this->orders()->save($order);
+        return $order;
     }
 
     /**
@@ -89,27 +106,37 @@ trait Billable
      */
     public function subscribed($plan = 'default')
     {
-        return $this->subscriptions->contains(function ($value, $key) use ($plan) {
-            return $value->plan == $plan;
-        });
+        $subscription = $this->subscriptions()
+            ->wherePlan($plan)
+            ->whereNotNull('ends_at')
+            ->orderBy('ends_at', 'desc')
+            ->first();
+        if (! $subscription) {
+            return false;
+        }
+        return $subscription->isActive();
     }
 
     /**
-     * Subscribes the Billable entity to a plan and charges the given amount
+     * Subscribes the Billable entity to a plan for the given product_id
      * 
      * @param  string $plan
-     * @param  float $amount
+     * @param  integer $product_id
      * @param  array  $options
      * @return Subscription
      */
-    public function subscribe($plan, $amount, $options = [])
+    public function subscribe($plan, $product_id, $options = [])
     {
+        $order = $this->order($product_id, $options);
+
         $subscription = new Subscription([
-            'plan'      => $plan,
-            'status'    => 'active',
+            'plan'          => $plan,
+            'product_id'    => $order->product_id,
+            'customer_id'   => $order->customer_id,
+            'ends_at'       => Carbon::now()->addMonths(1)->toDateString(),
+            'status'        => 'active',
         ]);
 
-        $this->charge($amount, $options);
         $this->subscriptions()->save($subscription);
 
         return $subscription;
