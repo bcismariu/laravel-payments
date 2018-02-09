@@ -17,7 +17,7 @@ return [
             'driver'    => 'konnektive',
             'loginId'   => env('KONNEKTIVE_LOGIN', 'konnekt'),
             'password'  => env('KONNEKTIVE_PASSWORD', 'konnekt'),
-            'campaignId'    => '111',
+            'campaignId'    => env('KONNEKTIVE_CAMPAIGN_ID', '1'),
         ]
     ],
 
@@ -32,6 +32,12 @@ return [
          * and returns a populated Customer instance.
          */
         'customer'  => Bcismariu\Laravel\Payments\Transformers\Customer::class,
-    ]
+    ],
 
+    /**
+     * Parent class for the app Models
+     */
+    'models' => [
+        'parent'    => Illuminate\Database\Eloquent\Model::class
+    ],
 ];

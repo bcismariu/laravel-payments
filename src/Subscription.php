@@ -2,10 +2,9 @@
 
 namespace Bcismariu\Laravel\Payments;
 
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
-class Subscription extends Model
+class Subscription extends ParentModel
 {
     protected $table = 'payments_subscriptions';
 

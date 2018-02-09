@@ -2,9 +2,7 @@
 
 namespace Bcismariu\Laravel\Payments;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Order extends Model
+class Order extends ParentModel
 {
     protected $table = 'payments_orders';
 

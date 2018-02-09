@@ -90,13 +90,16 @@ class Konnektive
         $this->request->emailAddress  = $customer->email;
         $this->request->phoneNumber   = $customer->phone;
         $this->request->ipAddress     = $customer->ip_address;
-        $this->request->billShipSame  = $customer->billShipSame;
 
-        $this->request->shipAddress1  = $customer->shipAddress1;
-        $this->request->shipCity      = $customer->shipCity;
-        $this->request->shipState     = $customer->shipState;
-        $this->request->shipPostalCode    = $customer->shipPostalCode;
-        $this->request->shipCountry       = $customer->shipCountry;
+        if (! $customer->billShipSame) {
+            $this->request->shipAddress1  = $customer->shipAddress1;
+            $this->request->shipCity      = $customer->shipCity;
+            $this->request->shipState     = $customer->shipState;
+            $this->request->shipPostalCode    = $customer->shipPostalCode;
+            $this->request->shipCountry       = $customer->shipCountry;            
+        } else {
+            $this->request->billShipSame = 1;
+        }
     }
 
     protected function applyCreditCard()
