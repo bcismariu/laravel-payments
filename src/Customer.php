@@ -16,6 +16,7 @@ class Customer extends Base\DynamicProperties
         'email'     => null,
         'phone'     => null,
         'ip_address'    => null,
+        'billShipSame'  => null,
         'shipAddress1'  => null,
         'shipCity'      => null,
         'shipState'     => null,

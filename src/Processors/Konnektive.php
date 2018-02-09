@@ -90,6 +90,7 @@ class Konnektive
         $this->request->emailAddress  = $customer->email;
         $this->request->phoneNumber   = $customer->phone;
         $this->request->ipAddress     = $customer->ip_address;
+        $this->request->billShipSame  = $customer->billShipSame;
 
         $this->request->shipAddress1  = $customer->shipAddress1;
         $this->request->shipCity      = $customer->shipCity;
