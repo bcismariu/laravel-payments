@@ -30,7 +30,7 @@ trait Billable
         $response = $this->processPayment();
 
         if ($response->status !== 'success') {
-            throw new \Exception($response->message);
+            throw new \Exception(json_encode($response->message));
         }
         
         $order = $this->saveOrder($response);
