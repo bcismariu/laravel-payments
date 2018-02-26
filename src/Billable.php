@@ -5,6 +5,7 @@ namespace Bcismariu\Laravel\Payments;
 use Bcismariu\Laravel\Payments\Processors\Konnektive;
 use Bcismariu\Laravel\Payments\Processors\Response;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 trait Billable 
 {
@@ -164,6 +165,21 @@ trait Billable
             $subscription->status = 'cancelled';
             $subscription->save();
         }
+    }
+
+    /**
+     * Gets all purchases of a Billable
+     * 
+     * @return Illuminate\Support\Collection
+     */
+    public function purchases()
+    {
+        $order = $this->orders->first();
+        if (!$order) {
+            return new Collection();
+        }
+        $processor = $this->getProcessor();
+        return $processor->getPurchases($order->customer_id);
     }
 
     /**

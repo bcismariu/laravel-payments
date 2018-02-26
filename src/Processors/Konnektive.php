@@ -10,7 +10,9 @@ use Konnektive\Dispatcher;
 use Konnektive\Request\Order\ImportOrderRequest;
 use Konnektive\Request\Order\QueryOrderRequest;
 use Konnektive\Request\Order\CancelOrderRequest;
+use Konnektive\Request\Purchase\QueryPurchasesRequest;
 use Konnektive\Response\Response as KonnektiveResponse;
+use Illuminate\Support\Collection;
 
 
 class Konnektive
@@ -87,6 +89,43 @@ class Konnektive
         $this->validate();
         $dispatcher = new Dispatcher();
         $response = $dispatcher->handle($this->request);
+    }
+
+    public function getPurchases($customer_id, $options = [])
+    {
+        $this->request = new QueryPurchasesRequest();
+
+        // this defaults may be overwritten by the $options
+        $this->applyOptions([
+            'startDate' => '01/01/2000',
+            'endDate'   => '12/31/2100',
+            'resultsPerPage'    => 100
+        ]);
+
+        $options['customerId'] = $customer_id;
+        
+        $this->applyOptions($options);
+        $this->validate();
+
+        $dispatcher = new Dispatcher();
+        $response = $dispatcher->handle($this->request);
+
+        $purchases = (new Descendable($response))->get('message.data', []);
+        $transactions = new Collection();
+
+        foreach ($purchases as $purchase) {
+            foreach ($purchase['transactions'] as $transaction) {
+                $transactions->push([
+                    'transaction_id'    => $transaction['transactionId'],
+                    'datetime'          => $transaction['txnDate'],
+                    'amount'            => $transaction['totalAmount'],
+                    'status'            => $transaction['responseType'],
+                    'details'           => $transaction['responseText'],
+                ]);
+            }
+        }
+
+        return $transactions;
     }
 
     protected function applyCustomer()
