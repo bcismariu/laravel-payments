@@ -9,6 +9,7 @@ use Bcismariu\Commons\Descendable\Descendable;
 use Konnektive\Dispatcher;
 use Konnektive\Request\Order\ImportOrderRequest;
 use Konnektive\Request\Order\QueryOrderRequest;
+use Konnektive\Request\Order\CancelOrderRequest;
 use Konnektive\Response\Response as KonnektiveResponse;
 
 
@@ -75,6 +76,19 @@ class Konnektive
         return $response->raw;
     }
 
+    public function cancelOrder($order_id, $reason = "User cancelled")
+    {
+        $this->request = new CancelOrderRequest();
+        $this->applyOptions([
+            'orderId' => $order_id,
+            'cancelReason'  => $reason,
+            'afterNextBill' => true
+        ]);
+        $this->validate();
+        $dispatcher = new Dispatcher();
+        $response = $dispatcher->handle($this->request);
+    }
+
     protected function applyCustomer()
     {
         $customer = $this->customer;
@@ -135,6 +149,7 @@ class Konnektive
 
     protected function applyOptions($options = [])
     {
+        $this->options = array_merge($this->options, $options);
         foreach ($this->options as $key => $value) {
             $this->request->$key = $value;
         }

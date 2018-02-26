@@ -10,7 +10,7 @@ trait Billable
 {
     protected $_payments_card;
     protected $_product;
-    protected $_options;
+    protected $_options = [];
 
     public function charge($ammount, $options = [])
     {
@@ -133,6 +133,7 @@ trait Billable
             'plan'          => $plan,
             'product_id'    => $order->product_id,
             'customer_id'   => $order->customer_id,
+            'order_id'      => $order->order_id,
             'ends_at'       => Carbon::now()->addMonths(1)->toDateString(),
             'status'        => 'active',
         ]);
@@ -140,6 +141,29 @@ trait Billable
         $this->subscriptions()->save($subscription);
 
         return $subscription;
+    }
+
+    /**
+     * Unsubscribes the Billable entity from a plan
+     * 
+     * @param  string $plan
+     */
+    public function unsubscribe($plan)
+    {
+        $subscriptions = $this->subscriptions()
+            ->wherePlan($plan)
+            ->whereNotNull('ends_at')
+            ->orderBy('ends_at', 'desc')
+            ->get();
+        foreach ($subscriptions as $subscription) {
+            if (!$subscription->isActive()) {
+                continue;
+            }
+            $processor = $this->getProcessor();
+            $processor->cancelOrder($subscription->order_id);
+            $subscription->status = 'cancelled';
+            $subscription->save();
+        }
     }
 
     /**
