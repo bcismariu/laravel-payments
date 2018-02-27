@@ -199,9 +199,10 @@ class Konnektive
         try {
             $this->request->validate();
         } catch(\Illuminate\Validation\ValidationException $e) {
-            // dump($this->request);
-            // dd($e->validator->errors());
-            throw $e;
+            $message = "Request: " . $this->request->toJson() .
+                "\nErrors: " . $e->validator->errors()->toJson()
+            ;
+            throw new \Exception($message);
         }
     }
 
