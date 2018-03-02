@@ -93,7 +93,7 @@ class Konnektive
 
     public function getPurchases($customer_id, $options = [])
     {
-        $this->request = new QueryPurchasesRequest();
+        $this->request = new QueryOrderRequest();
 
         // this defaults may be overwritten by the $options
         $this->applyOptions([
@@ -110,19 +110,16 @@ class Konnektive
         $dispatcher = new Dispatcher();
         $response = $dispatcher->handle($this->request);
 
-        $purchases = (new Descendable($response))->get('message.data', []);
+        $orders = (new Descendable($response))->get('message.data', []);
         $transactions = new Collection();
 
-        foreach ($purchases as $purchase) {
-            foreach ($purchase['transactions'] as $transaction) {
+        foreach ($orders as $order) {
                 $transactions->push([
-                    'transaction_id'    => $transaction['transactionId'],
-                    'datetime'          => $transaction['txnDate'],
-                    'amount'            => $transaction['totalAmount'],
-                    'status'            => $transaction['responseType'],
-                    'details'           => $transaction['responseText'],
+                    'order_id'          => $order['orderId'],
+                    'datetime'          => $order['dateCreated'],
+                    'amount'            => $order['price'],
+                    'status'            => $order['orderStatus'],
                 ]);
-            }
         }
 
         return $transactions;
