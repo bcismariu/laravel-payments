@@ -14,17 +14,17 @@ use Konnektive\Request\Purchase\QueryPurchasesRequest;
 use Konnektive\Response\Response as KonnektiveResponse;
 use Illuminate\Support\Collection;
 
-
 class Konnektive
 {
     protected $customer;
-    protected $credit_card;
+    protected $credit_card = null;
     protected $products = [];
     protected $options = [];
     protected $request;
 
 
-    public function __construct($settings = []) {
+    public function __construct($settings = [])
+    {
         unset($settings['driver']);
         $this->options = $settings;
     }
@@ -60,7 +60,7 @@ class Konnektive
 
         $this->validate();
 
-        $dispatcher = new Dispatcher();    
+        $dispatcher = new Dispatcher();
         $response = $dispatcher->handle($this->request);
         return $this->transformResponse($response);
     }
@@ -146,7 +146,7 @@ class Konnektive
             $this->request->shipCity      = $customer->shipCity;
             $this->request->shipState     = $customer->shipState;
             $this->request->shipPostalCode    = $customer->shipPostalCode;
-            $this->request->shipCountry       = $customer->shipCountry;            
+            $this->request->shipCountry       = $customer->shipCountry;
         } else {
             $this->request->billShipSame = 1;
         }
@@ -155,6 +155,10 @@ class Konnektive
     protected function applyCreditCard()
     {
         $card = $this->credit_card;
+        if (!$card) {
+            $this->request->paySource = 'ACCTONFILE';
+            return;
+        }
 
         $this->request->paySource     = 'CREDITCARD';
         $this->request->cardNumber    = $card->number;
@@ -195,7 +199,7 @@ class Konnektive
     {
         try {
             $this->request->validate();
-        } catch(\Illuminate\Validation\ValidationException $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             $message = "Request: " . $this->request->toJson() .
                 "\nErrors: " . $e->validator->errors()->toJson()
             ;

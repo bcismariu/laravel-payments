@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 
 trait Billable 
 {
-    protected $_payments_card;
+    protected $_payments_card = null;
     protected $_product;
     protected $_options = [];
 
@@ -198,7 +198,9 @@ trait Billable
         $processor = $this->getProcessor();
 
         $processor->setCustomer($this->getTransformedCustomer());
-        $processor->setCreditCard($this->_payments_card);
+        if ($this->_payments_card) {
+            $processor->setCreditCard($this->_payments_card);
+        }
         $processor->addProduct($this->_product);
 
         return $processor->process();
