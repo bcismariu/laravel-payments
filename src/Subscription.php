@@ -12,6 +12,7 @@ class Subscription extends ParentModel
         'plan',
         'product_id',
         'customer_id',
+        'order_id',
         'status',
         'ends_at',
     ];
