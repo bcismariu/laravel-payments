@@ -107,15 +107,11 @@ trait Billable
      */
     public function subscribed($plan = 'default')
     {
-        $subscription = $this->subscriptions()
+        return (bool) $this->subscriptions()
+            ->active()
             ->wherePlan($plan)
-            ->whereNotNull('ends_at')
-            ->orderBy('ends_at', 'desc')
-            ->first();
-        if (! $subscription) {
-            return false;
-        }
-        return $subscription->isActive();
+            ->count()
+        ;
     }
 
     /**

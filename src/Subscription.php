@@ -45,4 +45,11 @@ class Subscription extends ParentModel
             && $this->ends_at->gt(Carbon::now())
         ;
     }
+
+    public function scopeActive($query)
+    {
+        return $query->whereStatus('active')
+            ->where('ends_at', '>', Carbon::now())
+        ;
+    }
 }
