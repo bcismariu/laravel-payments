@@ -100,18 +100,21 @@ trait Billable
     }
 
     /**
-     * Checks if the Billable entity subscribed to the given plan
+     * Checks if the Billable entity subscribed to any of the given plans
      * 
-     * @param  string $plan
+     * @param  mixed $plans
      * @return boolean
      */
-    public function subscribed($plan = 'default')
+    public function subscribed($plans = [])
     {
-        return (bool) $this->subscriptions()
-            ->active()
-            ->wherePlan($plan)
-            ->count()
-        ;
+        if (!is_array($plans)) {
+            $plans = [$plans];
+        }
+        $query = $this->subscriptions()->active();
+        if (count($plans)) {
+            $query->whereIn('plan', $plans);
+        }
+        return (bool) $query->count();
     }
 
     /**
